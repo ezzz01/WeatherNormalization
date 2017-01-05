@@ -1,4 +1,4 @@
-package com.maalka
+package com.maalka.examples
 
 /**
   * Created by tadassugintas on 04/01/2017.

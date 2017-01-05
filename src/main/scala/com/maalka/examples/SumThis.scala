@@ -1,9 +1,9 @@
-package com.maalka
+package com.maalka.examples
 
 /**
   * Created by tadassugintas on 05/01/2017.
   */
-class SumThis {
+object SumThis {
 
   val R = org.ddahl.rscala.RClient()
 

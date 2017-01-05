@@ -1,4 +1,4 @@
-import com.maalka.SumThis
+import com.maalka.examples.SumThis
 import org.scalatest.FunSuite
 
 /**
@@ -8,8 +8,7 @@ class TestSumThis extends FunSuite {
 
   test("try summing in R") {
     val param1 =  (1 to 10).toArray
-    val sumThis = new SumThis
-    val output = sumThis.sumThis(param1)
+    val output = SumThis.sumThis(param1)
     assert(output == 55)
   }
 
