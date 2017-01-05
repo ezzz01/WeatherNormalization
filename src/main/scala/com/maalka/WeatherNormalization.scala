@@ -5,7 +5,7 @@ package com.maalka
   */
 object WeatherNormalization {
 
-  def segmented(x: Array[Double], y: Array[Double]) = {
+  def segmented(x: Array[Double], y: Array[Double]): Array[Array[Double]] = {
 
     val R = org.ddahl.rscala.RClient()
 
@@ -29,10 +29,11 @@ object WeatherNormalization {
 
     val result = R.evalD2(s"myfunc()[['psi']]")
 
-    Console.println("Intial: " + result(0)(0))
+    Console.println("Initial: " + result(0)(0))
     Console.println("Est.: " + result(0)(1))
     Console.println("Std.Err.: " + result(0)(2))
 
+    result
   }
 
 }
