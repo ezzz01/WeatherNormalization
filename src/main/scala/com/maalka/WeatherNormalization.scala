@@ -85,4 +85,42 @@ object WeatherNormalization {
     linearRegressionResult
   }
 
+
+  /**
+    * calculate polynomial for all values in the temperature array
+    * @param temperature
+    * @param energy
+    * @return
+    */
+  def polyval(temperature: Array[Double], energy: Array[Double]): Array[Double] = {
+    val R = org.ddahl.rscala.RClient()
+
+    R eval
+      """
+        library(signal)
+
+        polyvalFunc <- function() {
+          inputdata <- data.frame(energy, temperature)
+          formula <- energy ~ temperature
+          lmresult <- lm(formula, inputdata)
+          polyval(c(lmresult[['coefficients']]), temperature)
+        }
+
+      """
+
+    R.set ("temperature", temperature)
+    R.set ("energy", energy)
+
+    var polyvalResult = Array[Double]()
+
+    try {
+      polyvalResult = R.evalD1(s"polyvalFunc()")
+      Console.println("linear regression function at point 0: " + polyvalResult(0))
+      Console.println("linear regression function at point 1: " + polyvalResult(1))
+
+    } catch {
+      case re: RuntimeException => Console.println("Exception: " + re.getMessage)
+    }
+    polyvalResult
+  }
 }
