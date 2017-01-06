@@ -5,33 +5,47 @@ package com.maalka
   */
 object WeatherNormalization {
 
-  def segmented(x: Array[Double], y: Array[Double]): Array[Array[Double]] = {
+  def segmented(temperature: Array[Double], energy: Array[Double]): Array[Array[Double]] = {
 
     val R = org.ddahl.rscala.RClient()
 
     R eval
       """
         library(segmented)
-        myfunc <- function(param1) {
-        ## x <- c(1:10, 13:22)
-        ## x <- param1
-        y <- numeric(20)
-        ## Create first segment
-        y[1:10] <- 20:11 + rnorm(10, 0, 1.5)
-        ## Create second segment
-        y[11:20] <- seq(11, 15, len=10) + rnorm(10, 0, 1.5)
-        lin.mod <- lm(y~x)
-        segmented.mod <- segmented(lin.mod, seg.Z = ~x, psi=14)
+        regress <- function(param1) {
+
+          formula <- energy~temperature
+
+          #fit a linear regression to the x,y vectors in the R environment
+          fit <- lm(formula)
+
+          if(length(temperature) > 11) {
+            segments <- segmented(fit, seg.Z = ~temperature, psi=NA, seg.control(K=1))
+          } else if (length(temperature) > 6 && length(temperature) <= 11) {
+            segments <- segmented(fit, seg.Z = ~temperature, psi=NA, seg.control(K=1))
+          }
         }
       """
 
-    R.set ("x", x)
+    R.set ("temperature", temperature)
+    R.set ("energy", energy)
 
-    val result = R.evalD2(s"myfunc()[['psi']]")
+    var result = Array(Array[Double]())
 
-    Console.println("Initial: " + result(0)(0))
-    Console.println("Est.: " + result(0)(1))
-    Console.println("Std.Err.: " + result(0)(2))
+    try {
+
+      result = R.evalD2(s"regress()[['psi']]")
+
+      Console.println("Initial: " + result(0)(0))
+      Console.println("Est.: " + result(0)(1))
+      Console.println("Std.Err.: " + result(0)(2))
+
+    } catch {
+      case re: RuntimeException => Console.println("Exception: " + re.getMessage)
+    }
+
+
+
 
     result
   }
