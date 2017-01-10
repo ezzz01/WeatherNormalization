@@ -6,59 +6,59 @@ import org.scalatest.{FunSuite, Matchers}
   */
 class TestWeatherNormalization extends FunSuite with Matchers {
 
+  val temperature: Array[Double] = Array(58.50980467,
+    63.45122707,
+    67.43902743,
+    73.47472108,
+    73.88896326,
+    78.20371135,
+    35.1165211,
+    37.0796274,
+    39.56033974,
+    40.65875764,
+    43.78553948,
+    55.25805336,
+    58.50980467,
+    63.45122707,
+    67.43902743,
+    73.47472108,
+    73.88896326,
+    78.20371135,
+    35.1165211,
+    37.0796274,
+    39.56033974,
+    40.65875764,
+    43.78553948,
+    55.25805336)
+
+  val energy = Array[Double](73721,
+    89498,
+    61194,
+    89961,
+    72190,
+    92936,
+    108784,
+    121845,
+    95001,
+    114360,
+    85885,
+    95352,
+    62586,
+    58525,
+    67290,
+    67507,
+    76550,
+    77018,
+    47837,
+    75993,
+    48123,
+    50771,
+    51176,
+    47931)
+
   test("test with 24 data points") {
 
-    val temp: Array[Double] = Array(58.50980467,
-      63.45122707,
-      67.43902743,
-      73.47472108,
-      73.88896326,
-      78.20371135,
-      35.1165211,
-      37.0796274,
-      39.56033974,
-      40.65875764,
-      43.78553948,
-      55.25805336,
-      58.50980467,
-      63.45122707,
-      67.43902743,
-      73.47472108,
-      73.88896326,
-      78.20371135,
-      35.1165211,
-      37.0796274,
-      39.56033974,
-      40.65875764,
-      43.78553948,
-      55.25805336)
-
-    val energy = Array[Double](73721,
-      89498,
-      61194,
-      89961,
-      72190,
-      92936,
-      108784,
-      121845,
-      95001,
-      114360,
-      85885,
-      95352,
-      62586,
-      58525,
-      67290,
-      67507,
-      76550,
-      77018,
-      47837,
-      75993,
-      48123,
-      50771,
-      51176,
-      47931)
-
-    val result = WeatherNormalization.segmentedRegression(temp, energy)
+    val result = WeatherNormalization.segmentedRegression(temperature, energy)
     result.map { res => res.psi(0).est shouldBe  67.5 +- 0.2}
     result.map { res => res.residuals(0) shouldBe  3370.0 +- 5.0}
   }
@@ -112,6 +112,10 @@ class TestWeatherNormalization extends FunSuite with Matchers {
     val result = WeatherNormalization.polyval(temp, energy)
     result.length should equal(temp.length)
 
+  }
+
+  test("calculate output with 24 data points") {
+    WeatherNormalization.calculateOutput(temperature, energy)
   }
 
 }
