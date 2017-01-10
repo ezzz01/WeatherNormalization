@@ -3,7 +3,7 @@ package com.maalka
 /**
   * Created by tadassugintas on 09/01/2017.
   */
-case class SegmentedRegressionResult(psi: List[BreakPoint], residuals: Array[Double])
+case class SegmentedRegressionResult(psi: List[BreakPoint], residuals: Array[Double], coefficients: Array[Double])
 
 /**
   * Estimated break-points and relevant (approximate) standard errors

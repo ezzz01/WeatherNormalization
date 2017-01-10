@@ -14,7 +14,6 @@ object WeatherNormalization {
     R eval
       """
         library(segmented)
-
         regress <- function() {
 
           formula <- energy ~ temperature
@@ -22,7 +21,9 @@ object WeatherNormalization {
           #fit a linear regression to the temperature, energy vectors
           fit <- lm(formula)
 
-          segments <- segmented(fit, seg.Z = ~temperature, psi=NA, seg.control(K=K_input))
+          segs <- segmented(fit, seg.Z = ~temperature, psi=NA, seg.control(K=K_input))
+          coefs = coef(segs)
+          result <- list(coefficients = coefs, psi = segs['psi'], residuals = segs['residuals'])
         }
       """
 
@@ -40,15 +41,17 @@ object WeatherNormalization {
       }
 
       val ref:RObject = R.evalR(s"regress()")
+
       val breakpoints = R.evalD1(s"unlist(${ref}['psi'])")
+      val coefficients = R.evalD1(s"unlist(${ref}['coefficients'])")
+      val residuals = R.evalD1(s"unlist(${ref}['residuals'])")
 
       val break1 =  BreakPoint(breakpoints(0), breakpoints(1), breakpoints(2))
+
       // not sure what indexes unlist function will give to breakpoint2
       //val break2 =  BreakPoint(breakpoints(3), breakpoints(4), breakpoints(5))
 
-      val residuals: Array[Double] = R.evalD1(s"unlist(${ref}['residuals'])")
-
-      Some(SegmentedRegressionResult(List(break1), residuals))
+      Some(SegmentedRegressionResult(List(break1), residuals, coefficients))
 
     } catch {
       case re: RuntimeException => Console.println("Exception: " + re.getMessage)
