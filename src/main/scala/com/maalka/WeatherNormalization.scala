@@ -1,11 +1,13 @@
 package com.maalka
 
+import org.ddahl.rscala.RObject
+
 /**
   * Created by tadassugintas on 04/01/2017.
   */
 object WeatherNormalization {
 
-  def segmentedRegression(temperature: Array[Double], energy: Array[Double]): Array[Array[Double]] = {
+  def segmentedRegression(temperature: Array[Double], energy: Array[Double]): Option[SegmentedRegressionResult] = {
 
     val R = org.ddahl.rscala.RClient()
 
@@ -27,29 +29,31 @@ object WeatherNormalization {
     R.set ("temperature", temperature)
     R.set ("energy", energy)
 
-    var segmentedResult = Array(Array[Double]())
-
     try {
 
       if (temperature.length > 11) {
         R.set("K_input", 1)
         // run once more with 1 if 2 fails
-        // R.set("K_input", 1)
+        // R.set("K_input", 2)
       } else if (temperature.length > 6 && temperature.length <= 11) {
         R.set("K_input", 1)
       }
 
-      segmentedResult = R.evalD2(s"regress()[['psi']]")
+      val ref:RObject = R.evalR(s"regress()")
+      val breakpoints = R.evalD1(s"unlist(${ref}['psi'])")
 
-      Console.println("Initial: " + segmentedResult(0)(0))
-      Console.println("Est.: " + segmentedResult(0)(1))
-      Console.println("Std.Err.: " + segmentedResult(0)(2))
+      val break1 =  BreakPoint(breakpoints(0), breakpoints(1), breakpoints(2))
+      // not sure what indexes unlist function will give to breakpoint2
+      //val break2 =  BreakPoint(breakpoints(3), breakpoints(4), breakpoints(5))
+
+      val residuals: Array[Double] = R.evalD1(s"unlist(${ref}['residuals'])")
+
+      Some(SegmentedRegressionResult(List(break1), residuals))
 
     } catch {
       case re: RuntimeException => Console.println("Exception: " + re.getMessage)
+        Option.empty
     }
-
-    segmentedResult
   }
 
   def linearRegression(temperature: Array[Double], energy: Array[Double]): Array[Double] = {
