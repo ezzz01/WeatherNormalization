@@ -159,8 +159,11 @@ object WeatherNormalization {
     polyvalResult
   }
 
-  def calculateOutput(temperature: Array[Double], energy: Array[Double]): Unit = {
+  def calculateOutput(temperature: Array[Double], energy: Array[Double]): (Option[String], Option[String]) = {
     val output = segmentedRegression(temperature, energy)
+
+    var y_hat: Option[String] = None
+    var CP_ref: Option[String] = None
 
     output.map { o =>
 
@@ -218,12 +221,10 @@ object WeatherNormalization {
         val x_p = List(p_0(0), p_break1(0), p_max(0))
         val y_p = List(p_0(1), p_break1(1), p_max(1))
 
-        val y_hat = "y_hat (when Temperature <= " + break1 + ") = " + b + " + " + m1 + "*Temperature\n" +
-          "y_hat (when Temperature > " + break1 + ") = " + p_break1(1) + " + " + m2 + "*(Temperature - " + break1 + ")"
-        val CP_ref = "Change Point References @ " + "Start=" + p_0 + "Break_1=" + p_break1 + "End=" + p_max
+        y_hat = Some("y_hat (when Temperature <= " + break1 + ") = " + b + " + " + m1 + "*Temperature\n" +
+          "y_hat (when Temperature > " + break1 + ") = " + p_break1(1) + " + " + m2 + "*(Temperature - " + break1 + ")" )
+        CP_ref = Some("Change Point References @ " + "Start=" + p_0 + "Break_1=" + p_break1 + "End=" + p_max )
 
-        Console.println(y_hat)
-        Console.println(CP_ref)
 
       } else if(o.psi.length == 2) {
 
@@ -259,18 +260,14 @@ object WeatherNormalization {
         val x_p = List(p_0(0), p_break1(0), p_break2(0), p_max(0))
         val y_p = List(p_0(1), p_break1(1), p_break2(0), p_max(1))
 
-        val y_hat = "y_hat (when Temperature <= " + break1 + ") = " + b + " + " + m1 + "*Temperature\n" +
+        y_hat = Some( "y_hat (when Temperature <= " + break1 + ") = " + b + " + " + m1 + "*Temperature\n" +
                   "y_hat (when " +  break1 +  "< Temperature < " + break2 + ") = " + p_break1(1) + " + " + m2 + "*(Temperature - " + break1 + ")" +
-                  "y_hat (when Temperature > " + break2 + ") = " + p_break2(1) + " + " + m3 + "*(Temperature - " + break2 + ")"
-        val CP_ref = "Change Point References @ " + "Start=" + p_0 + "Break_1=" + p_break1 + "Break2=" + p_break2 + "End=" + p_max
-
-        Console.println(y_hat)
-        Console.println(CP_ref)
+                  "y_hat (when Temperature > " + break2 + ") = " + p_break2(1) + " + " + m3 + "*(Temperature - " + break2 + ")" )
+        CP_ref = Some("Change Point References @ " + "Start=" + p_0 + "Break_1=" + p_break1 + "Break2=" + p_break2 + "End=" + p_max )
 
       }
-
-
     }
 
+    (y_hat, CP_ref)
   }
 }
